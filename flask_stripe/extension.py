@@ -15,8 +15,6 @@ from .routes import webhooks
 
 logger = logging.getLogger('Flask-Stripe')
 
-stripe.verify_ssl_certs = False
-
 
 class Stripe(object):
     """
@@ -37,8 +35,11 @@ class Stripe(object):
         if stripe_key is None:
             logger.warning('STRIPE_SECRET_KEY not set')
             return
-
         stripe.api_key = stripe_key
+
+        if app.debug:
+            stripe.verify_ssl_certs = False
+
         if blueprint is not None:
             blueprint.add_url_rule('/stripe', 'stripe', webhooks, methods=['POST'])
 
