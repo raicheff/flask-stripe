@@ -9,12 +9,23 @@
 import logging
 
 from flask import Response, current_app, request
+from six.moves.http_client import ACCEPTED
 from stripe import Event
 
 from .signals import namespace
 
 
 TEST_EVENT_ID = 'evt_00000000000000'
+
+# https://stripe.com/docs/ips
+IPS_WEBHOOKS = (
+    '54.187.174.169',
+    '54.187.205.235',
+    '54.187.216.72',
+    '54.241.31.99',
+    '54.241.31.102',
+    '54.241.34.107',
+)
 
 
 logger = logging.getLogger('Flask-Stripe')
@@ -36,7 +47,7 @@ def webhooks():
         signal.send(current_app._get_current_object(), object=event.data.object)
         logger.info('event=%s', event)
 
-    return Response(status=202)  # ACCEPTED
+    return Response(status=ACCEPTED)
 
 
 # EOF

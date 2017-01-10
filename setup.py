@@ -8,6 +8,6 @@ setup(
     author='Boris Raicheff',
     author_email='b@raicheff.com',
     url='https://github.com/raicheff/flask-stripe',
-    install_requires=['flask', 'stripe'],
+    install_requires=['flask', 'six', 'stripe'],
     packages=['flask_stripe'],
 )
