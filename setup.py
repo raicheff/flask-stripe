@@ -2,7 +2,7 @@ from setuptools import setup
 
 
 setup(
-    name='flask-stripe',
+    name='Flask-Stripe',
     version='0.1.0',
     description='Flask-Stripe',
     author='Boris Raicheff',
