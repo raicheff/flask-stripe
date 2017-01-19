@@ -1,7 +1,7 @@
 #
 # Flask-Stripe
 #
-# Copyright (C) 2014 Boris Raicheff
+# Copyright (C) 2017 Boris Raicheff
 # All rights reserved
 #
 
