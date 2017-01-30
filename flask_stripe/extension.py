@@ -59,7 +59,7 @@ class Stripe(object):
             stripe.verify_ssl_certs = False
 
         if blueprint is not None:
-            blueprint.add_url_rule('/stripe', 'stripe', self.handle_webhook, methods=['POST'])
+            blueprint.add_url_rule('/stripe', 'stripe', self.handle_webhook, methods=('POST',))
 
     def handle_webhook(self):
         """
