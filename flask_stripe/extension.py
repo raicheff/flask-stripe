@@ -10,9 +10,10 @@ import logging
 
 import stripe
 
-from flask import Response, request
-from six.moves.http_client import OK
-from stripe import Event
+from flask import Response, abort, request
+from six.moves.http_client import BAD_REQUEST, OK
+from stripe import Webhook
+from stripe.error import SignatureVerificationError
 
 from .signals import namespace
 
@@ -44,6 +45,8 @@ class Stripe(object):
     :param app: Flask app to initialize with. Defaults to `None`
     """
 
+    endpoint_secret = None
+
     def __init__(self, app=None, blueprint=None):
         if app is not None:
             self.init_app(app, blueprint)
@@ -54,6 +57,10 @@ class Stripe(object):
             logger.warning('STRIPE_SECRET_KEY not set')
             return
         stripe.api_key = stripe_key
+
+        endpoint_secret = self.endpoint_secret = app.config.get('STRIPE_ENDPOINT_SECRET')
+        if endpoint_secret is None:
+            logger.warning('STRIPE_ENDPOINT_SECRET not set')
 
         if app.debug:
             stripe.verify_ssl_certs = False
@@ -71,12 +78,26 @@ class Stripe(object):
         event_id = request.get_json().get('id')
         logger.info('event_id=%s', event_id)
 
+        signature = request.headers.get('stripe-signature')
+        if signature is None:
+            abort(BAD_REQUEST)
+
+        try:
+            # event = Event.retrieve(event_id)
+            event = Webhook.construct_event(request.get_data(as_text=True), signature, self.endpoint_secret)
+            logger.info('event=%s', event)
+            namespace.signal(event.type).send(self, object=event.data.object)
+        except ValueError as error:
+            # Invalid payload
+            logger.warning('error=%s', error)
+            abort(BAD_REQUEST)
+        except SignatureVerificationError as error:
+            # Invalid signature
+            logger.warning('error=%s', error)
+            abort(BAD_REQUEST)
+
         if event_id == TEST_EVENT_ID:
             return Response(status=OK)
-
-        event = Event.retrieve(event_id)
-        namespace.signal(event.type).send(self, object=event.data.object)
-        logger.info('event=%s', event)
 
         return Response(status=OK)
 
