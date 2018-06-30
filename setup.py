@@ -6,7 +6,7 @@
 #
 
 
-from setuptools import setup
+from setuptools import find_packages, setup
 
 
 setup(
@@ -17,7 +17,7 @@ setup(
     author_email='b@raicheff.com',
     url='https://github.com/raicheff/flask-stripe',
     install_requires=('flask', 'six', 'stripe'),
-    packages=('flask_stripe',),
+    packages=find_packages(),
 )
 
 
